@@ -170,6 +170,11 @@ class XlaHelpers {
       xla::XlaOp input, xla::XlaOp aux_input,
       absl::Span<const int64_t> output_sizes);
 
+  static xla::XlaOp DynamicUnboundedBroadcast(
+      xla::XlaOp input, xla::XlaOp aux_input,
+      absl::Span<const int64_t> output_sizes,
+      std::vector<int64_t> aux_input_dimensions);
+
   static xla::XlaOp DynamicReshapeAs(xla::XlaOp input, const xla::Shape& shape);
 
   static bool SameStaticDimensions(const xla::Shape& shape1,

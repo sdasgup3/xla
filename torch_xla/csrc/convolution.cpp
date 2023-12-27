@@ -342,11 +342,15 @@ xla::XlaOp BuildConvolutionOverrideableBias(
       BuildConvolutionOverrideable(input, kernel, stride, padding, dilation,
                                    transposed, output_padding, groups);
   auto broadcast_sizes = XlaHelpers::SizesOfXlaOp(conv);
+  std::vector<int64_t> conv_dims(broadcast_sizes.size());
+  std::iota(conv_dims.begin(), conv_dims.end(), 0);
   // Remove the channels dimension.
   broadcast_sizes.erase(broadcast_sizes.begin() + 1);
+  conv_dims.erase(conv_dims.begin() + 1);
   // Make the bias match the output dimensions.
   xla::XlaOp bias_broadcast =
-      xla::Transpose(xla::Broadcast(bias, broadcast_sizes),
+      xla::Transpose(XlaHelpers::DynamicUnboundedBroadcast(
+                         bias, conv, broadcast_sizes, conv_dims),
                      BiasTransposePermutation(broadcast_sizes.size() + 1));
   auto promoted = XlaHelpers::Promote(conv, bias_broadcast);
   return xla::Add(
